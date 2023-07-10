@@ -18,7 +18,7 @@ Initializes (spawns) the powershell.
 
 `returnCallback` = `( pipeResults: {data: JSON, errors: string[]} ): void`
 
-- To not use `returnCallback` (like only using `get()`), you may deliberaatly pass `null`.
+- To not use `returnCallback` (like only using `get()`), you may deliberately pass `null`.
 
 `pipeControl` = `{close, exec, get}` ... see below
 
