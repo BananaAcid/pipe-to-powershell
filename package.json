@@ -1,6 +1,6 @@
 {
   "name": "pipe-to-powershell",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "BananaAcid <repo@bananaacid.de>",
   "license": "ISC",
   "description": "Pipe commands to a Powershell instance and get results as JSON",
@@ -8,10 +8,17 @@
   "homepage": "https://github.com/BananaAcid/pipe-to-powershell",
   "main": "index.mjs",
   "scripts": {
-    "start": "node example1.mjs",
-    "test": "node example2.mjs",
-    "test3": "node example3.mjs"
+    "start": "node examples/example1.mjs",
+    "test": "node examples/example2.mjs",
+    "test3": "node examples/example3.mjs"
   },
+  "keywords": [
+    "pwsh",
+    "powershell",
+    "terminal",
+    "pipe",
+    "stream"
+  ],
   "dependencies": {
     "@getflywheel/replacestream": "^4.1.1"
   }

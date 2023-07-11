@@ -16,20 +16,27 @@ npm i pipe-to-powershell
 ### `createPowershellStream(returnCallback|null, config? = CONFIG_DEFAULT): pipeControl` 
 Initializes (spawns) the powershell.
 
-`returnCallback` = `( pipeResults: {data: JSON, errors: string[]} ): void`
+**`returnCallback`** = `( pipeResults: {data: JSON|null, errors: string[]|null} ): void`
 
-- To not use `returnCallback` (like only using `get()`), you may deliberately pass `null`.
+- If you do not want to use `returnCallback` (like only using `get()`), you may deliberately pass `null`.
 
-`pipeControl` = `{close, exec, get}` ... see below
+**`pipeControl`** = `{close, exec, get}` ... see below
 
-`CONFIG_DEFAULT` = `{bin: string = 'pwsh' /*executable bin*/, stream: stream.Stream|null = stream.Readable /*input stream*/, execMode: 'brackets'|null = 'brackets'}`
+**`CONFIG_DEFAULT`** = 
+```js
+{
+	bin: string = 'pwsh' /*executable binary*/, 
+	stream: stream.Stream|null = stream.Readable /*input stream*/, 
+	execMode: 'brackets'|null = 'brackets' /*see notes*/
+}
+```
 
 - In case powershell changes its prompts, additional config properties `{delim = 'PS ', delimMultiline = '>> '}` can be overwritten.
 
-You might want to use `get()` and change to an older powershell:
-```js
-let {close, get} = createPowershellStream(null, {bin: 'powershell.exe'});
-````
+- You might want to use `get()` and change to an older powershell:
+  ```js
+  let {close, get} = createPowershellStream(null, {bin: 'powershell.exe'});
+  ````
 
 ### `close(): void`
 Closes the pipes and Kills the spawned powershell.
@@ -45,14 +52,26 @@ Should be awaited to mitigate race conditions. Running in paralell is not suppor
 Does not need returnCallback, during initialisation the param can be set to `null`. You should be using `close()`, when you are done.
 
 ```js
+// get result and all errors produced
 let {data, error} = await get('ls');
 
-let {data: files} = await get('ls'); // this will decunstruct data, and provide it as variable 'files'
+// this will decunstruct pipeResults, extracting data, and provide it as variable 'files'
+let {data: files} = await get('ls');
 ```
 
 ### pushing to the input pipe
 You can always use `inputStream.push(string)`, but note, your command should end with `\n`
 
+### Debugging
+Environment Parameter
+```env
+DEBUG_PIPETOPOWERSHELL=true
+```
+
+Within code:
+```js
+process.env.DEBUG_PIPETOPOWERSHELL = true;
+```
 
 ## Notes
 - Variable expressions should always be in brackets, which is automatically done by `config.execMode`: `($a = "Hello")` - because the conversion to JSON for the result would save the JSON encoded version (with extra quotes).
@@ -60,7 +79,7 @@ You can always use `inputStream.push(string)`, but note, your command should end
 
 ## Examples
 
-Terminal input to powershell
+Terminal input to powershell, try: `npm start`
 ```js
 import createPowershellStream from 'pipe-to-powershell';
 
@@ -77,7 +96,7 @@ let {close, call, get} = createPowershellStream(({data, errors}) => {
 }, {stream: process.stdin}); // process.stdin or null (null == string pipe)
 ```
 
-Trigger a few commands on powershell and get results, while piping to the same instance
+Trigger a few commands on powershell and get results, while piping to the same instance, try `npm test`
 ```js
 import createPowershellStream from 'pipe-to-powershell';
 
@@ -85,7 +104,6 @@ import createPowershellStream from 'pipe-to-powershell';
 // create a piped commandline with custom prompt - no callback needed
 let {close, get} = createPowershellStream(null);
 
-//get debug output:  process.env.DEBUG_PIPETOPOWERSHELL = true;
 (async _ => {
 
 	let {data: files} = await get('ls');
@@ -95,6 +113,34 @@ let {close, get} = createPowershellStream(null);
 	let {data: ver} = await get('$PSVersionTable.PSVersion');
 
 	console.log(`PS Version: ${ver.Major}.${ver.Minor}.${ver.Patch}`);
+
+	close();
+})();
+```
+
+Consecutive manipulates to the powershell environment: changing variables and relying on the previous changes, try `npm run test3`
+```js
+import createPowershellStream from 'pipe-to-powershell';
+
+
+// create a piped commandline with custom prompt - no callback needed
+let {close, get} = createPowershellStream(null);
+
+// we will NOT use exec(), since it would not wait
+
+(async _ => {
+
+	await get(`$a = "Hello"`);
+
+	let ret = await get('$a');
+
+	console.log('Value: ', ret.data);
+
+	await get(`$a = "$($a) World!"`);
+
+	ret = await get('$a');
+
+	console.log('Value: ', ret.data);
 
 	close();
 })();

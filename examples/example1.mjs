@@ -1,4 +1,4 @@
-import createPowershellStream from './index.mjs';
+import createPowershellStream from '../index.mjs';
 
 
 process.stdout.write('press ^D to end \n:: ');

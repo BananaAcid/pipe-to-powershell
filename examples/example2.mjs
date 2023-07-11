@@ -1,4 +1,4 @@
-import createPowershellStream from './index.mjs';
+import createPowershellStream from '../index.mjs';
 
 
 // create a piped commandline with custom prompt - no callback needed
