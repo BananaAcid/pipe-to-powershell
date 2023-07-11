@@ -25,9 +25,9 @@ Initializes (spawns) the powershell.
 **`CONFIG_DEFAULT`** = 
 ```js
 {
-	bin: string = 'pwsh' /*executable binary*/, 
-	stream: stream.Stream|null = stream.Readable /*input stream*/, 
-	execMode: 'brackets'|null = 'brackets' /*see notes*/
+  bin: string = 'pwsh' /*executable binary*/, 
+  stream: stream.Stream|null = stream.Readable /*input stream*/, 
+  execMode: 'brackets'|null = 'brackets' /*see notes*/
 }
 ```
 
@@ -63,6 +63,8 @@ let {data: files} = await get('ls');
 You can always use `inputStream.push(string)`, but note, your command should end with `\n`
 
 ### Debugging
+Enabling will show all powershell prompts unfiltered, responses and queries.
+
 Environment Parameter
 ```env
 DEBUG_PIPETOPOWERSHELL=true
@@ -88,11 +90,11 @@ process.stdout.write('press ^D to end \n:: ');
 
 // create a piped commandline with custom prompt 
 let {close, call, get} = createPowershellStream(({data, errors}) => {
-	// show powershell result
-	console.log('ERRORS:', errors, 'DATA:', data);
+  // show powershell result
+  console.log('ERRORS:', errors, 'DATA:', data);
 
-	// show a custom promt for next input
-	process.stdout.write(':: ');
+  // show a custom promt for next input
+  process.stdout.write(':: ');
 }, {stream: process.stdin}); // process.stdin or null (null == string pipe)
 ```
 
@@ -106,15 +108,15 @@ let {close, get} = createPowershellStream(null);
 
 (async _ => {
 
-	let {data: files} = await get('ls');
+  let {data: files} = await get('ls');
 
-	console.log('Files in this folder: ', files.length);
+  console.log('Files in this folder: ', files.length);
 
-	let {data: ver} = await get('$PSVersionTable.PSVersion');
+  let {data: ver} = await get('$PSVersionTable.PSVersion');
 
-	console.log(`PS Version: ${ver.Major}.${ver.Minor}.${ver.Patch}`);
+  console.log(`PS Version: ${ver.Major}.${ver.Minor}.${ver.Patch}`);
 
-	close();
+  close();
 })();
 ```
 
@@ -130,18 +132,18 @@ let {close, get} = createPowershellStream(null);
 
 (async _ => {
 
-	await get(`$a = "Hello"`);
+  await get(`$a = "Hello"`);
 
-	let ret = await get('$a');
+  let ret = await get('$a');
 
-	console.log('Value: ', ret.data);
+  console.log('Value: ', ret.data);
 
-	await get(`$a = "$($a) World!"`);
+  await get(`$a = "$($a) World!"`);
 
-	ret = await get('$a');
+  ret = await get('$a');
 
-	console.log('Value: ', ret.data);
+  console.log('Value: ', ret.data);
 
-	close();
+  close();
 })();
 ```
